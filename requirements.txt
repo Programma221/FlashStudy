@@ -1,7 +1,5 @@
-decouple
-dj_database_url
+python-decouple
+dj-database-url
 django
 requests
-the
-typing
 gunicorn

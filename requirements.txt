@@ -3,3 +3,4 @@ dj-database-url
 django
 requests
 gunicorn
+psycopg[binary]==3.1.10

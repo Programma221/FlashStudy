@@ -1,11 +1,13 @@
-[
-build
-]
+[build]
 builder = "nixpacks"
 
-[
-deploy
-]
-startCommand = "python manage.py migrate && gunicorn FlashStudy.wsgi:application"
+[deploy]
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
+
+[[deploy.healthcheckProbes]]
+type = "HTTP"
+path = "/"
+
+[deploy.releaseCommand]
+template = "python manage.py migrate"

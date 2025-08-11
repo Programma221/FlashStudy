@@ -1,7 +1,6 @@
 import requests
 import time
 from typing import List, Tuple, Optional
-from pathlib import Path
 from decouple import config
 
 HUGGINGFACE_API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"

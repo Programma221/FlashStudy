@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth import login, logout
 from django.contrib import messages
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
@@ -9,7 +9,6 @@ from .models import CustomUser
 from .utils import send_verification_email
 from django.utils import timezone
 from datetime import timedelta
-
 
 
 def signup_view(request):

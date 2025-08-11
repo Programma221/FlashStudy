@@ -4,3 +4,4 @@ django
 requests
 the
 typing
+gunicorn

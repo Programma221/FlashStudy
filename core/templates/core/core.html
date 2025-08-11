@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en" style="background-color: #15151e; color: white">
+<head>
+    <meta charset="UTF-8">
+    <title>Study Flash</title>
+    <style>
+        /* Keep all existing styles and add these new ones */
+        body {
+            margin: 0;
+            font-family: sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: linear-gradient(to bottom, #31465a, #15151e);
+            padding: 0;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            height: calc(100vh - 60px);
+        }
+
+        .left-pane {
+            flex: 2;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .right-pane {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            background-color: #15151e;
+        }
+
+        .textarea-container {
+            display: flex;
+            position: relative;
+            width: 100%;
+        }
+
+        .textarea-container textarea {
+            width: 100%;
+            height: 300px;
+            font-family: monospace;
+            margin-bottom: 1rem;
+            background-color: #214e48;
+            resize: vertical;
+            padding: 1rem;
+            box-sizing: border-box;
+            color: white;
+        }
+
+        .text-counter {
+            position: absolute;
+            top: -2rem;
+            right: 0;
+            font-size: 0.8rem;
+            color: #ccc;
+            background: rgba(21, 21, 30, 0.85);
+            padding: 3px 8px;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        .widget {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: #214e48;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .card-search {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+
+        .card-search input {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 4px 0 0 4px;
+            background-color: #0e2d26;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .card-search button {
+            padding: 0.5rem 1rem;
+            background-color: #031812;
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .flashcard-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #31465a;
+            border-radius: 6px;
+            padding: 0.5rem;
+            background-color: #1b1b2a;
+        }
+
+        .flashcard-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .flashcard-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background-color: #2a3b4c;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .flashcard-item:hover {
+            background-color: #3c5264;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #aaa;
+            font-style: italic;
+        }
+
+        .generate-bar input {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 4px 0 0 4px;
+            background-color: #0e2d26;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .generate-bar button {
+            padding: 0.5rem 1rem;
+            background-color: #031812;
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        /* Flashcard display styles */
+        .flashcard-display {
+            min-height: 250px;
+            background-color: #1b1b2a;
+            border: 1px solid #31465a;
+            border-radius: 6px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .flashcard {
+            width: 100%;
+            max-width: 300px;
+            height: 180px;
+            background: linear-gradient(135deg, #2a3b4c, #1e2a3a);
+            border: 2px solid #31465a;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flashcard:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .flashcard-content {
+            padding: 1rem;
+            font-size: 1rem;
+            line-height: 1.4;
+            color: #fff;
+            word-wrap: break-word;
+        }
+
+        .flashcard-controls {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .flashcard-controls button {
+            padding: 0.5rem 1rem;
+            background-color: #031812;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .flashcard-controls button:hover {
+            background-color: #0e2d26;
+        }
+
+        .flashcard-controls button:disabled {
+            background-color: #2a2a2a;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .card-counter {
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+
+        .flip-indicator {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            font-size: 0.7rem;
+            color: #aaa;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .side-indicator {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            font-size: 0.7rem;
+            color: #aaa;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        /* Save flashcards styles */
+        .save-section {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #1b1b2a;
+            border: 1px solid #31465a;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .save-section.show {
+            display: block;
+        }
+
+        .save-input {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .save-input input {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 4px;
+            background-color: #0e2d26;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .save-input button {
+            padding: 0.5rem 1rem;
+            background-color: #2d5a1a;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .delete-btn {
+            background-color: #5a1a1a !important;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .success-message {
+            color: #4ade80;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .set-title {
+            flex: 1;
+        }
+
+        .set-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1 style="flex: 1; margin-left: 2rem; margin-top: 0.5rem">Study Flash</h1>
+    {% if user.is_authenticated %}
+        <form action="{% url 'logout' %}" method="post"
+              style="margin-right: 1rem;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-secondary">Log Out</button>
+        </form>
+    {% endif %}
+</header>
+<div class="container">
+    <div class="left-pane">
+        <h1>Pasted Text</h1>
+        <form method="post" id="main-form">
+            {% csrf_token %}
+            <div class="textarea-container">
+                <textarea id="text-content" name="text_content"
+                          placeholder="Paste your text here...">{{ submitted_text }}</textarea>
+                <div class="text-counter" id="text-counter">Words: 0 / 2100 |
+                    Chars: 0 / 13590
+                </div>
+            </div>
+            <button type="submit" name="summarize">Summarize Text</button>
+            <input type="hidden" name="num_cards" id="num_cards" value="3">
+            <input type="hidden" name="flashcards_data" id="flashcards_data">
+            <input type="hidden" name="set_title" id="set_title">
+        </form>
+        <div id="summarized-text" style="margin-top: 2rem;">
+            <h3>Summary</h3>
+            {% if summary %}
+                <p>{{ summary|linebreaks }}</p>
+            {% elif summary_requested %}
+                <p><em>Summarization failed or still loading...</em></p>
+            {% else %}
+                <p>Paste text and submit to generate a summary.</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="right-pane">
+        <h1>Flashcards</h1>
+
+        <!-- Flashcard Display Widget -->
+        <div class="widget"
+             {% if not flashcards %}style="display: none;"{% endif %}>
+            <h3>Study Flashcards</h3>
+            <div class="flashcard-display">
+                <!-- When no flashcards are loaded -->
+                <div class="empty-message" id="no-flashcards"
+                     {% if flashcards %}style="display: none;"{% endif %}>
+                    <p>Generate or select flashcards to start studying</p>
+                </div>
+
+                <!-- Flashcard container -->
+                <div id="flashcard-container">
+                    <div class="flashcard" id="current-flashcard">
+                        <div class="side-indicator" id="side-indicator">
+                            Question
+                        </div>
+                        <div class="flashcard-content" id="flashcard-text">
+                            <!-- Content will be populated by JavaScript -->
+                        </div>
+                        <div class="flip-indicator">Click to flip</div>
+                    </div>
+
+                    <div class="flashcard-controls">
+                        <button id="prev-card">← Previous</button>
+                        <span class="card-counter"
+                              id="card-counter">1 / 1</span>
+                        <button id="next-card">Next →</button>
+                        <button id="flip-card">Flip Card</button>
+                        <button id="save-cards-btn">Save Set</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Save Section -->
+            <div class="save-section" id="save-section">
+                <div class="save-input">
+                    <input type="text" id="save-title-input"
+                           placeholder="Enter set title..." maxlength="200">
+                    <button id="confirm-save-btn">Save</button>
+                    <button id="cancel-save-btn"
+                            style="background-color: #5a1a1a;">Cancel
+                    </button>
+                </div>
+                {% if save_success %}
+                    <div class="success-message">Flashcard set saved
+                        successfully!
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="widget">
+            <h3>Saved Flashcard Sets</h3>
+            <div class="card-search">
+                <input type="text" id="search-sets" maxlength="60"
+                       placeholder="Search sets...">
+                <button id="search-btn">Search</button>
+            </div>
+            <div class="flashcard-list">
+                {% if flashcard_sets %}
+                    <ul id="flashcard-sets-list">
+                        {% for set in flashcard_sets %}
+                            <li class="flashcard-item"
+                                data-set-id="{{ set.id }}">
+                                <div class="set-title">{{ set.title }}</div>
+                                <div class="set-actions">
+                                    <button class="load-set-btn"
+                                            data-set-id="{{ set.id }}">Load
+                                    </button>
+                                    <button class="delete-btn"
+                                            data-set-id="{{ set.id }}">Delete
+                                    </button>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="empty-message">No saved flashcard sets yet.</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="widget">
+            <h3>Generate Flash Cards</h3>
+            <div class="card-search">
+                <input type="number" id="card-number-input" placeholder="1-6"
+                       min="1" max="6" value="3" style="flex: 1">
+                <button id="generate-cards-btn" style="flex: 5">Generate
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const textarea = document.getElementById('text-content');
+    const counter = document.getElementById('text-counter');
+
+    function updateCounter() {
+        const text = textarea.value;
+        const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+        const charCount = text.length;
+        counter.textContent = `Words: ${wordCount} / 2100 | Chars: ${charCount} / 13590`;
+    }
+
+    textarea.addEventListener('input', updateCounter);
+    updateCounter();
+
+    // Flashcard functionality
+    let flashcards = [];
+    let currentCardIndex = 0;
+    let isShowingAnswer = false;
+    let currentSetTitle = '';
+
+    // Load flashcards from Django context if available
+    {% if flashcards_json %}
+        flashcards = {{ flashcards_json|safe }};
+        {% if loaded_set_title %}
+            currentSetTitle = "{{ loaded_set_title }}";
+        {% endif %}
+        initializeFlashcards();
+    {% endif %}
+
+    function initializeFlashcards() {
+        if (flashcards && flashcards.length > 0) {
+            currentCardIndex = 0;
+            isShowingAnswer = false;
+            showFlashcardContainer();
+            displayCurrentCard();
+            updateCardCounter();
+            updateNavigationButtons();
+        }
+    }
+
+    function showFlashcardContainer() {
+        document.getElementById('no-flashcards').style.display = 'none';
+        document.getElementById('flashcard-container').style.display = 'block';
+    }
+
+    function displayCurrentCard() {
+        if (flashcards.length === 0) return;
+
+        const card = flashcards[currentCardIndex];
+        const flashcardText = document.getElementById('flashcard-text');
+        const sideIndicator = document.getElementById('side-indicator');
+
+        if (isShowingAnswer) {
+            flashcardText.textContent = card[1]; // Answer
+            sideIndicator.textContent = 'Answer';
+        } else {
+            flashcardText.textContent = card[0]; // Question
+            sideIndicator.textContent = 'Question';
+        }
+    }
+
+    function updateCardCounter() {
+        const counter = document.getElementById('card-counter');
+        counter.textContent = `${currentCardIndex + 1} / ${flashcards.length}`;
+    }
+
+    function updateNavigationButtons() {
+        const prevBtn = document.getElementById('prev-card');
+        const nextBtn = document.getElementById('next-card');
+
+        prevBtn.disabled = currentCardIndex === 0;
+        nextBtn.disabled = currentCardIndex === flashcards.length - 1;
+    }
+
+    function flipCard() {
+        isShowingAnswer = !isShowingAnswer;
+        displayCurrentCard();
+    }
+
+    function nextCard() {
+        if (currentCardIndex < flashcards.length - 1) {
+            currentCardIndex++;
+            isShowingAnswer = false;
+            displayCurrentCard();
+            updateCardCounter();
+            updateNavigationButtons();
+        }
+    }
+
+    function prevCard() {
+        if (currentCardIndex > 0) {
+            currentCardIndex--;
+            isShowingAnswer = false;
+            displayCurrentCard();
+            updateCardCounter();
+            updateNavigationButtons();
+        }
+    }
+
+    // Event listeners
+    document.getElementById('flip-card')?.addEventListener('click', flipCard);
+    document.getElementById('current-flashcard')?.addEventListener('click', flipCard);
+    document.getElementById('next-card')?.addEventListener('click', nextCard);
+    document.getElementById('prev-card')?.addEventListener('click', prevCard);
+
+    // Generate cards button functionality
+    document.getElementById('generate-cards-btn')?.addEventListener('click', function () {
+        const textContent = document.getElementById('text-content').value.trim();
+
+        if (!textContent) {
+            alert('Please paste some text first before generating flashcards.');
+            return;
+        }
+
+        const numCards = document.getElementById('card-number-input').value || 3;
+        document.getElementById('num_cards').value = numCards;
+
+        const form = document.getElementById('main-form');
+        const existingInput = form.querySelector('input[name="generate_flashcard"]');
+        if (existingInput) {
+            existingInput.remove();
+        }
+
+        const generateInput = document.createElement('input');
+        generateInput.type = 'hidden';
+        generateInput.name = 'generate_flashcard';
+        generateInput.value = 'true';
+        form.appendChild(generateInput);
+
+        form.submit();
+    });
+
+    // Save flashcards functionality
+    document.getElementById('save-cards-btn')?.addEventListener('click', function () {
+        if (flashcards.length === 0) {
+            alert('No flashcards to save!');
+            return;
+        }
+
+        const saveSection = document.getElementById('save-section');
+        saveSection.classList.add('show');
+
+        // Pre-fill with current set title if available
+        const titleInput = document.getElementById('save-title-input');
+        if (currentSetTitle) {
+            titleInput.value = currentSetTitle;
+        } else {
+            titleInput.value = `Flashcard Set ${new Date().toLocaleDateString()}`;
+        }
+        titleInput.focus();
+    });
+
+    document.getElementById('confirm-save-btn')?.addEventListener('click', function () {
+        const title = document.getElementById('save-title-input').value.trim();
+        if (!title) {
+            alert('Please enter a title for your flashcard set.');
+            return;
+        }
+
+        // Prepare form data
+        document.getElementById('flashcards_data').value = JSON.stringify(flashcards);
+        document.getElementById('set_title').value = title;
+
+        const form = document.getElementById('main-form');
+        const existingInput = form.querySelector('input[name="save_flashcards"]');
+        if (existingInput) {
+            existingInput.remove();
+        }
+
+        const saveInput = document.createElement('input');
+        saveInput.type = 'hidden';
+        saveInput.name = 'save_flashcards';
+        saveInput.value = 'true';
+        form.appendChild(saveInput);
+
+        form.submit();
+    });
+
+    document.getElementById('cancel-save-btn')?.addEventListener('click', function () {
+        document.getElementById('save-section').classList.remove('show');
+    });
+
+    // Load flashcard set functionality
+    document.querySelectorAll('.load-set-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const setId = this.getAttribute('data-set-id');
+            window.location.href = `/load-set/${setId}/`;
+        });
+    });
+
+    // Delete flashcard set functionality
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            if (confirm('Are you sure you want to delete this flashcard set?')) {
+                const setId = this.getAttribute('data-set-id');
+
+                // Create a form for deletion
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/delete-set/${setId}/`;
+
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrfmiddlewaretoken';
+                csrfInput.value = csrfToken;
+                form.appendChild(csrfInput);
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    });
+
+    // Search functionality
+    document.getElementById('search-btn')?.addEventListener('click', function () {
+        const searchTerm = document.getElementById('search-sets').value.toLowerCase();
+        const setsList = document.getElementById('flashcard-sets-list');
+
+        if (!setsList) return;
+
+        const items = setsList.querySelectorAll('.flashcard-item');
+
+        items.forEach(item => {
+            const title = item.querySelector('.set-title').textContent.toLowerCase();
+            if (title.includes(searchTerm) || searchTerm === '') {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+
+    // Search on Enter key
+    document.getElementById('search-sets')?.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            document.getElementById('search-btn').click();
+        }
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function (e) {
+        if (flashcards.length === 0) return;
+
+        switch (e.key) {
+            case 'ArrowLeft':
+                e.preventDefault();
+                prevCard();
+                break;
+            case 'ArrowRight':
+                e.preventDefault();
+                nextCard();
+                break;
+            case ' ':
+            case 'Enter':
+                e.preventDefault();
+                flipCard();
+                break;
+        }
+    });
+</script>
+</body>
+</html>

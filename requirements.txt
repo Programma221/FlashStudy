@@ -1,4 +1,4 @@
-python-decouple
+python-decouple==3.8
 dj-database-url
 django
 requests

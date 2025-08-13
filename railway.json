@@ -1,0 +1,9 @@
+{
+  "build": {
+    "builder": "nixpacks",
+    "buildCommand": "python manage.py migrate"
+  },
+  "deploy": {
+    "startCommand": "gunicorn myapp.wsgi"
+  }
+}

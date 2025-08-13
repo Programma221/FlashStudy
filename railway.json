@@ -1,9 +1,9 @@
 {
   "build": {
     "builder": "nixpacks",
-    "buildCommand": "python manage.py migrate"
+    "buildCommand": "python manage.py makemigrations && python manage.py migrate"
   },
   "deploy": {
-    "startCommand": "gunicorn myapp.wsgi"
+    "startCommand": "gunicorn myproject.wsgi --log-file -"
   }
 }
